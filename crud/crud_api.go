@@ -10,9 +10,10 @@ import (
 
 type APICrudModel interface {
 	GetDatabase() *gorm.DB
+	GetActiveConditionMap() map[string]interface{}
 	TableName() string
 	GetId() int64
-	SetDeleted(bool)
+	Delete() (bool, error)
 	List() interface{}
 }
 
@@ -51,10 +52,7 @@ func getModel(m APICrudModel) func(c *gin.Context) {
 			err error
 		)
 		dbManager := m.GetDatabase()
-		where := map[string]interface{}{
-			"deleted": false,
-		}
-		q := dbManager.Select('*').Where(where)
+		q := dbManager.Select('*').Where(m.GetActiveConditionMap())
 		if IdRaw == "" {
 			limit, offset := GetLimitOffset(c)
 			res = m.List()
@@ -140,11 +138,17 @@ func deleteModel(m APICrudModel) func(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, err)
 		}
 		dbManager := m.GetDatabase()
-		m.SetDeleted(true)
-		err = dbManager.Model(m).Where("id=?", id).Updates(m).Error
+		soft, err := m.Delete()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err)
 			return
+		}
+		if soft {
+			err = dbManager.Model(m).Where("id=?", id).Updates(m).Error
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, err)
+				return
+			}
 		}
 		c.Status(http.StatusOK)
 	}
