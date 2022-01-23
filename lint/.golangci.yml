@@ -1,0 +1,36 @@
+# To view a full config sample see the following link
+# https://golangci-lint.run/usage/configuration/
+
+# options for analysis running
+run:
+  # by default isn't set. If set we pass it to "go list -mod={option}". From "go help modules":
+  # If invoked with -mod=readonly, the go command is disallowed from the implicit
+  # automatic updating of go.mod described above. Instead, it fails when any changes
+  # to go.mod are needed. This setting is most useful to check that go.mod does
+  # not need updates, such as in a continuous integration and testing system.
+  # If invoked with -mod=vendor, the go command assumes that the vendor
+  # directory holds the correct copies of dependencies and ignores
+  # the dependency descriptions in go.mod.
+  modules-download-mode: vendor
+  timeout: 10m
+
+  # Allow multiple parallel golangci-lint instances running.
+  # If false (default) - golangci-lint acquires file lock on start.
+  allow-parallel-runners: false
+
+# output configuration options
+output:
+  # sorts results by: filepath, line and column
+  sort-results: true
+
+linters:
+  enable-all: true
+  disable:
+    - nlreturn
+    - varnamelen
+    - wsl
+    - ireturn
+    - godox
+    - noctx
+    - goerr113
+    - testpackage

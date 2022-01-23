@@ -1,0 +1,4 @@
+FROM golangci/golangci-lint:latest
+ADD . /go/src/git.zooket.ir/snappfood/golang/surface
+WORKDIR /go/src/git.zooket.ir/snappfood/golang/surface
+CMD ["golangci-lint", "run", "-c", "lint/.golangci.yml"]
