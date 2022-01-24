@@ -52,7 +52,7 @@ func getModel(m APICrudModel) func(c *gin.Context) {
 			err error
 		)
 		dbManager := m.GetDatabase()
-		q := dbManager.Select('*').Where(m.GetActiveConditionMap())
+		q := dbManager.Where(m.GetActiveConditionMap())
 		if IdRaw == "" {
 			limit, offset := GetLimitOffset(c)
 			res = m.List()
@@ -92,7 +92,7 @@ func createModel(m APICrudModel) func(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, err)
 			return
 		}
-		err = dbManager.Select("*").First(m, m.GetId()).Error
+		err = dbManager.First(m, m.GetId()).Error
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err)
 			return
@@ -122,7 +122,7 @@ func updateModel(m APICrudModel) func(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, err)
 			return
 		}
-		err = dbManager.Select("*").First(m, m.GetId()).Error
+		err = dbManager.First(m, m.GetId()).Error
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err)
 			return
