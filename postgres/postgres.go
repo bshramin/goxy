@@ -29,3 +29,12 @@ func GetConnection(host string, port int, dbName, user, password, timezone strin
 	logrus.Info("Connected to Postgres: ", dsn)
 	return db
 }
+
+func HealthCheck(db *gorm.DB) error {
+	sqlDB, err := db.DB()
+	if err != nil {
+		return err
+	}
+	err = sqlDB.Ping()
+	return err
+}

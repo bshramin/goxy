@@ -37,3 +37,8 @@ func GetClusterConnection(name, host string, timeout int, kind string) (*redis.C
 	logrus.Infof("successfully connected to redis-%s host=%s", kind, host)
 	return client, nil
 }
+
+func HealthCheck(client redis.Cmdable) error {
+	_, err := client.Ping().Result()
+	return err
+}
