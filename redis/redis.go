@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetNormalConnection(name, host string, port, database, timeout, poolSize int, password, kind string) (*redis.Client, error) {
+func GetNormalConnection(host, password string, port, database, timeout, poolSize int) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:        host,
 		Password:    password,
@@ -18,23 +18,23 @@ func GetNormalConnection(name, host string, port, database, timeout, poolSize in
 	})
 	_, err := client.Ping().Result()
 	if err != nil {
-		logrus.Errorf("ping to normal redis failed to %s, host: %s", name, host)
-		return client, err
+		logrus.Errorf("ping to normal redis failed, host: %s", host)
+		panic(err)
 	}
-	logrus.Infof("successfully connected to redis-%s host=%s", kind, host)
+	logrus.Infof("successfully connected to redis-normal host=%s", host)
 	return client, nil
 }
 
-func GetClusterConnection(name, host string, timeout int, kind string) (*redis.ClusterClient, error) {
+func GetClusterConnection(host string, timeout int) (*redis.ClusterClient, error) {
 	client := redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs: strings.Split(host, ","),
 	})
 	_, err := client.Ping().Result()
 	if err != nil {
-		logrus.Errorf("ping to cluster redis failed to %s, host: %s", name, host)
-		return client, err
+		logrus.Errorf("ping to cluster redis failed, host: %s", host)
+		panic(err)
 	}
-	logrus.Infof("successfully connected to redis-%s host=%s", kind, host)
+	logrus.Infof("successfully connected to redis-cluster host=%s", host)
 	return client, nil
 }
 
