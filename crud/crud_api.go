@@ -5,14 +5,14 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type APICrudModel interface {
 	GetDatabase() *gorm.DB
 	GetActiveConditionMap() map[string]interface{}
 	TableName() string
-	GetId() int64
+	GetId() uint
 	Delete() (bool, error)
 	List() interface{}
 }
@@ -26,22 +26,23 @@ func CrudCreator(m APICrudModel) map[string]func(c *gin.Context) {
 	}
 }
 
-func GetLimitOffset(c *gin.Context) (int64, int64) {
+func GetLimitOffset(c *gin.Context) (int, int) {
 	limitRaw := c.Query("limit")
-	limit, err := strconv.ParseInt(limitRaw, 10, 0)
+	limit, err := strconv.Atoi(limitRaw)
 	if err != nil {
 		limit = 0
 	}
 	offsetRaw := c.Query("offset")
-	offset, err := strconv.ParseInt(offsetRaw, 10, 0)
+	offset, err := strconv.Atoi(offsetRaw)
 	if err != nil {
 		offset = 0
 	}
 	return limit, offset
 }
-func GetId(c *gin.Context) (int64, error) {
+func GetId(c *gin.Context) (uint, error) {
 	IdRaw := c.Param("id")
-	return strconv.ParseInt(IdRaw, 10, 0)
+	id, err := strconv.Atoi(IdRaw)
+	return uint(id), err
 }
 
 func getModel(m APICrudModel) func(c *gin.Context) {
