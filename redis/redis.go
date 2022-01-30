@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetNormalConnection(host, password string, port, database, timeout, poolSize int) (*redis.Client, error) {
+func GetNormalConnection(host, password string, port, database, timeout, poolSize int) *redis.Client {
 	client := redis.NewClient(&redis.Options{
 		Addr:        host,
 		Password:    password,
@@ -22,10 +22,10 @@ func GetNormalConnection(host, password string, port, database, timeout, poolSiz
 		panic(err)
 	}
 	logrus.Infof("successfully connected to redis-normal host=%s", host)
-	return client, nil
+	return client
 }
 
-func GetClusterConnection(host string, timeout int) (*redis.ClusterClient, error) {
+func GetClusterConnection(host string, timeout int) *redis.ClusterClient {
 	client := redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs: strings.Split(host, ","),
 	})
@@ -35,7 +35,7 @@ func GetClusterConnection(host string, timeout int) (*redis.ClusterClient, error
 		panic(err)
 	}
 	logrus.Infof("successfully connected to redis-cluster host=%s", host)
-	return client, nil
+	return client
 }
 
 func HealthCheck(client redis.Cmdable) error {
