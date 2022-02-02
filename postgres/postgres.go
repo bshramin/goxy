@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetConnection(host string, port int, dbName, user, password, timezone string) *gorm.DB {
+func GetConnection(host string, port int, dbName, user, password string) *gorm.DB {
 	dsn := url.URL{
 		User:     url.UserPassword(user, password),
 		Scheme:   "postgres",
