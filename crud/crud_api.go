@@ -11,7 +11,7 @@ import (
 type APICrudModel interface {
 	GetDatabase() *gorm.DB
 	GetActiveConditionMap() map[string]interface{}
-	GetId() int64
+	GetID() int64
 	Delete() (bool, error)
 	List() interface{}
 }
@@ -38,7 +38,7 @@ func GetLimitOffset(c *gin.Context) (int, int) {
 	}
 	return limit, offset
 }
-func GetId(c *gin.Context) (int64, error) {
+func GetID(c *gin.Context) (int64, error) {
 	IdRaw := c.Param("id")
 	id, err := strconv.ParseInt(IdRaw, 0, 10)
 	return int64(id), err
@@ -68,7 +68,7 @@ func getModel(m APICrudModel) func(c *gin.Context) {
 				return
 			}
 		} else {
-			id, err_ := GetId(c)
+			id, err_ := GetID(c)
 			if err_ != nil {
 				c.JSON(http.StatusBadRequest, err)
 			}
@@ -96,7 +96,7 @@ func createModel(m APICrudModel) func(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, err)
 			return
 		}
-		err = dbManager.First(m, m.GetId()).Error
+		err = dbManager.First(m, m.GetID()).Error
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err)
 			return
@@ -107,7 +107,7 @@ func createModel(m APICrudModel) func(c *gin.Context) {
 
 func updateModel(m APICrudModel) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		id, err := GetId(c)
+		id, err := GetID(c)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, err)
 		}
@@ -116,7 +116,7 @@ func updateModel(m APICrudModel) func(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, err)
 			return
 		}
-		if id != m.GetId() {
+		if id != m.GetID() {
 			c.JSON(http.StatusBadRequest, "url id is not equal with body id")
 			return
 		}
@@ -126,7 +126,7 @@ func updateModel(m APICrudModel) func(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, err)
 			return
 		}
-		err = dbManager.First(m, m.GetId()).Error
+		err = dbManager.First(m, m.GetID()).Error
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err)
 			return
@@ -137,7 +137,7 @@ func updateModel(m APICrudModel) func(c *gin.Context) {
 
 func deleteModel(m APICrudModel) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		id, err := GetId(c)
+		id, err := GetID(c)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, err)
 		}
