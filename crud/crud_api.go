@@ -11,8 +11,7 @@ import (
 type APICrudModel interface {
 	GetDatabase() *gorm.DB
 	GetActiveConditionMap() map[string]interface{}
-	TableName() string
-	GetId() uint
+	GetId() int64
 	Delete() (bool, error)
 	List() interface{}
 }
@@ -39,10 +38,10 @@ func GetLimitOffset(c *gin.Context) (int, int) {
 	}
 	return limit, offset
 }
-func GetId(c *gin.Context) (uint, error) {
+func GetId(c *gin.Context) (int64, error) {
 	IdRaw := c.Param("id")
-	id, err := strconv.Atoi(IdRaw)
-	return uint(id), err
+	id, err := strconv.ParseInt(IdRaw, 0, 10)
+	return int64(id), err
 }
 
 func getModel(m APICrudModel) func(c *gin.Context) {
@@ -64,17 +63,21 @@ func getModel(m APICrudModel) func(c *gin.Context) {
 				q.Offset(offset)
 			}
 			err = q.Find(res).Error
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, err)
+				return
+			}
 		} else {
 			id, err_ := GetId(c)
 			if err_ != nil {
 				c.JSON(http.StatusBadRequest, err)
 			}
-			err = q.Find(m, id).Error
+			err = q.First(m, id).Error
 			res = m
-		}
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, err)
-			return
+			if err != nil {
+				c.JSON(http.StatusNotFound, err)
+				return
+			}
 		}
 		c.JSON(http.StatusOK, res)
 	}
