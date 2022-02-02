@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
@@ -9,24 +10,22 @@ import (
 )
 
 func GetConnection(host string, port int, dbName, user, password, timezone string) *gorm.DB {
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=%s",
-		host,
-		user,
-		password,
-		dbName,
-		port,
-		timezone,
-	)
+	dsn := url.URL{
+		User:     url.UserPassword(user, password),
+		Scheme:   "postgres",
+		Host:     fmt.Sprintf("%s:%d", host, port),
+		Path:     dbName,
+		RawQuery: (&url.Values{"sslmode": []string{"disable"}}).Encode(),
+	}
 
-	logrus.Info("Connecting to Postgres: ", dsn)
+	logrus.Info("Connecting to Postgres: ", dsn.String())
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn.String()), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
 
-	logrus.Info("Connected to Postgres: ", dsn)
+	logrus.Info("Connected to Postgres: ", dsn.String())
 	return db
 }
 
