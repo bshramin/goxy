@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetNormalConnection(host, password string, port, database, timeout, poolSize int) *redis.Client {
+func GetNormalConnection(host, password string, database, timeout, poolSize int) *redis.Client {
 	client := redis.NewClient(&redis.Options{
 		Addr:        host,
 		Password:    password,
