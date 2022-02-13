@@ -92,6 +92,9 @@ github.com/modern-go/reflect2
 # github.com/sirupsen/logrus v1.4.2
 ## explicit
 github.com/sirupsen/logrus
+# github.com/streadway/amqp v1.0.0
+## explicit; go 1.10
+github.com/streadway/amqp
 # github.com/ugorji/go/codec v1.1.7
 ## explicit
 github.com/ugorji/go/codec

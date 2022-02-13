@@ -7,6 +7,7 @@ require (
 	github.com/go-mail/mail v2.3.1+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/sirupsen/logrus v1.4.2
+	github.com/streadway/amqp v1.0.0
 	gorm.io/driver/postgres v1.2.3
 	gorm.io/gorm v1.22.5
 )
