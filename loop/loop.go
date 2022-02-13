@@ -10,12 +10,14 @@ import (
 
 func InfiniteLoop(ctx context.Context, name string, f func(context.Context) error, reDoDuration, failDuration time.Duration) context.Context {
 	go func() {
-		DoTasKWithRetry(ctx, name, f, failDuration)
-		select {
-		case <-ctx.Done():
-			logrus.Debug(fmt.Sprintf("exit infinite loop: %s", name))
-			return
-		case <-time.After(reDoDuration):
+		for {
+			DoTasKWithRetry(ctx, name, f, failDuration)
+			select {
+			case <-ctx.Done():
+				logrus.Debug(fmt.Sprintf("exit infinite loop: %s", name))
+				return
+			case <-time.After(reDoDuration):
+			}
 		}
 	}()
 	return ctx
