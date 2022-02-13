@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func InfiniteLoop(ctx context.Context, name string, f func(context.CancelFunc) error, reDoDuration, failDuration time.Duration) context.Context {
+func InfiniteLoop(ctx context.Context, name string, f func(context.Context) error, reDoDuration, failDuration time.Duration) context.Context {
 	go func() {
 		DoTasKWithRetry(ctx, name, f, failDuration)
 		select {
@@ -21,16 +21,17 @@ func InfiniteLoop(ctx context.Context, name string, f func(context.CancelFunc) e
 	return ctx
 }
 
-func DoTasKWithRetry(c context.Context, name string, f func(context.CancelFunc) error, failDuration time.Duration) {
+func DoTasKWithRetry(c context.Context, name string, f func(context.Context) error, failDuration time.Duration) {
 	ctx, cl := context.WithCancel(c)
 	defer func() {
+		cl()
 		e := recover()
 		if e != nil {
 			logrus.Errorf(fmt.Sprintf("%s failed", name))
 		}
 	}()
 	for {
-		err := f(cl)
+		err := f(ctx)
 		if err == nil {
 			return
 		}
