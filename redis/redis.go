@@ -1,14 +1,15 @@
 package redis
 
 import (
+	"context"
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"github.com/sirupsen/logrus"
 )
 
-func GetNormalConnection(host, password string, database, timeout, poolSize int) *redis.Client {
+func GetNormalConnection(ctx context.Context, host, password string, database, timeout, poolSize int) *redis.Client {
 	client := redis.NewClient(&redis.Options{
 		Addr:        host,
 		Password:    password,
@@ -16,7 +17,7 @@ func GetNormalConnection(host, password string, database, timeout, poolSize int)
 		ReadTimeout: time.Duration(timeout) * time.Second, // This also sets the write timeout
 		PoolSize:    poolSize,
 	})
-	_, err := client.Ping().Result()
+	_, err := client.Ping(ctx).Result()
 	if err != nil {
 		logrus.Errorf("ping to normal redis failed, host: %s", host)
 		panic(err)
@@ -25,11 +26,11 @@ func GetNormalConnection(host, password string, database, timeout, poolSize int)
 	return client
 }
 
-func GetClusterConnection(host string, timeout int) *redis.ClusterClient {
+func GetClusterConnection(ctx context.Context, host string, timeout int) *redis.ClusterClient {
 	client := redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs: strings.Split(host, ","),
 	})
-	_, err := client.Ping().Result()
+	_, err := client.Ping(ctx).Result()
 	if err != nil {
 		logrus.Errorf("ping to cluster redis failed, host: %s", host)
 		panic(err)
@@ -38,7 +39,7 @@ func GetClusterConnection(host string, timeout int) *redis.ClusterClient {
 	return client
 }
 
-func HealthCheck(client redis.Cmdable) error {
-	_, err := client.Ping().Result()
+func HealthCheck(ctx context.Context, client redis.Cmdable) error {
+	_, err := client.Ping(ctx).Result()
 	return err
 }
