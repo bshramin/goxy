@@ -8,6 +8,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/sirupsen/logrus v1.4.2
 	gorm.io/driver/mysql v1.3.2
+	github.com/streadway/amqp v1.0.0
 	gorm.io/driver/postgres v1.2.3
 	gorm.io/gorm v1.23.1
 )
