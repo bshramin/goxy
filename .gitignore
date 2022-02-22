@@ -1,0 +1,5 @@
+/.idea
+!/vendor/vendor.json
+!/config.yml
+.env
+profile.cov

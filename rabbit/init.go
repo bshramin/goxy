@@ -22,26 +22,3 @@ func GetConnection(user, password, host string, port int, vHost string) *amqp.Co
 	}
 	return conn
 }
-
-func DeclareQueue(ch *amqp.Channel, queueName string) (amqp.Queue, error) {
-	return ch.QueueDeclare(
-		queueName, // name
-		false,     // durable
-		false,     // delete when unused
-		true,      // exclusive
-		false,     // no-wait
-		nil,       // arguments
-	)
-}
-
-func DeclareExchange(ch *amqp.Channel, exchangeName string) error {
-	return ch.ExchangeDeclare(
-		exchangeName, // name
-		"topic",      // type
-		true,         // durable
-		false,        // auto-deleted
-		false,        // internal
-		false,        // no-wait
-		nil,          // arguments
-	)
-}

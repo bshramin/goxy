@@ -11,18 +11,18 @@ type Consumer struct {
 	ExchangeName string
 }
 
-func (consumer *Consumer) setup() error {
+func (consumer *Consumer) setup(r RInfo) error {
 	ch, err := consumer.Conn.Channel()
 	if err != nil {
 		return err
 	}
 
-	err = DeclareExchange(ch, consumer.ExchangeName)
+	err = r.DeclareExchange(ch, consumer.ExchangeName)
 	if err != nil {
 		return err
 	}
 
-	q, err := DeclareQueue(ch, consumer.QueueName)
+	q, err := r.DeclareQueue(ch, consumer.QueueName)
 	if err != nil {
 		return err
 	}
@@ -38,13 +38,13 @@ func (consumer *Consumer) setup() error {
 }
 
 // NewConsumer returns a new Consumer
-func NewConsumer(conn *amqp.Connection, exchangeName string, queueName string) (Consumer, error) {
+func NewConsumer(conn *amqp.Connection,r RInfo, exchangeName string, queueName string) (Consumer, error) {
 	consumer := Consumer{
 		Conn:         conn,
 		QueueName:    queueName,
 		ExchangeName: exchangeName,
 	}
-	err := consumer.setup()
+	err := consumer.setup(r)
 	if err != nil {
 		return Consumer{}, err
 	}

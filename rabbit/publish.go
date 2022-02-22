@@ -10,24 +10,24 @@ type Emitter struct {
 	ExchangeName string
 }
 
-func (e *Emitter) setup() error {
+func (e *Emitter) setup(r RInfo) error {
 	ch, err := e.Conn.Channel()
 	if err != nil {
 		panic(err)
 	}
 
-	return DeclareExchange(ch, e.ExchangeName)
+	return r.DeclareExchange(ch, e.ExchangeName)
 }
 
 // NewEventEmitter returns a new event.Emitter object
 // ensuring that the object is initialised, without error
-func NewEventEmitter(conn *amqp.Connection, exchangeName string) (Emitter, error) {
+func NewEventEmitter(conn *amqp.Connection, r RInfo, exchangeName string) (Emitter, error) {
 	emitter := Emitter{
 		Conn:         conn,
 		ExchangeName: exchangeName,
 	}
 
-	err := emitter.setup()
+	err := emitter.setup(r)
 	if err != nil {
 		return Emitter{}, err
 	}
