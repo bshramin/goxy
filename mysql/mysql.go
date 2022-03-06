@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"fmt"
-	"net/url"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
@@ -10,23 +9,16 @@ import (
 )
 
 func GetConnection(host string, port int, dbName, user, password string) *gorm.DB {
-	dsn := url.URL{
-		User:     url.UserPassword(user, password),
-		Scheme:   "mysql",
-		Host:     fmt.Sprintf("%s:%d", host, port),
-		Path:     dbName,
-		RawQuery: (&url.Values{"sslmode": []string{"disable"}}).Encode(),
-	}
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", user, password, host, port, dbName)
+	logrus.Info("Connecting to MySQL: ", dsn)
 
-	logrus.Info("Connecting to MySQL: ", dsn.String())
-
-	db, err := gorm.Open(mysql.Open(dsn.String()), &gorm.Config{})
+	dbConn, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
 
-	logrus.Info("Connected to MySQL: ", dsn.String())
-	return db
+	logrus.Info("Connected to MySQL: ", dsn)
+	return dbConn
 }
 
 func HealthCheck(db *gorm.DB) error {
