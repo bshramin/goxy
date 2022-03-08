@@ -1,3 +1,3 @@
 # Goxy
 
-Helpers for go projects.
+Helpers for Go projects.
