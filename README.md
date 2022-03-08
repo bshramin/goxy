@@ -1,4 +1,3 @@
-# goxy
+# Goxy
 
-helpers for go projects:
-- Crud api creator(gorm)
+helpers for go projects.
