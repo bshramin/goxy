@@ -25,3 +25,41 @@ jobs:
 
     - name: Run Docker Lint
       run: docker run -i goxy-lint sh -c "cd  /go/src/github.com/bshramin/goxy && golangci-lint run"
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Build Docker Test
+      run: docker build -t goxy-test -f Dockerfile-test .
+
+    - name: Run Docker Test
+      run: docker run -i goxy-test sh -c "go env GOPATH | cd && cd /go/src/github.com/bshramin/goxy && go test -v -mod=vendor ./..."
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Build Docker Coverage
+      run: docker build -t goxy-coverage -f Dockerfile-test .
+
+    - name: Run Docker Coverage
+      run: docker run -i goxy-coverage sh -c "go env GOPATH | cd && cd /go/src/github.com/bshramin/goxy && sh ./coverage.sh""
