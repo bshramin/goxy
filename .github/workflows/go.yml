@@ -21,7 +21,7 @@ jobs:
       run: go build -v ./...
 
     - name: Build Docker Lint
-      run: docker build -f Dockerfile-lint .
+      run: docker build -t goxy-lint -f Dockerfile-lint .
 
     - name: Run Docker Lint
-      run: docker run -i lint:${CI_COMMIT_SHA:0:8} sh -c "cd  /go/src/github.com/bshramin/goxy && golangci-lint run"
+      run: docker run -i goxy-lint sh -c "cd  /go/src/github.com/bshramin/goxy && golangci-lint run"
