@@ -22,5 +22,6 @@ jobs:
 
     - name: Build & Run Docker Lint
       uses: actions/checkout@v2
-      run: docker build -t $CI_REGISTRY_IMAGE/lint:${CI_COMMIT_SHA:0:8} -f Dockerfile-lint .
-      run: docker run -i $CI_REGISTRY_IMAGE/lint:${CI_COMMIT_SHA:0:8} sh -c "cd  /go/src/github.com/bshramin/goxy && golangci-lint run"
+      run:
+       - docker build -t $CI_REGISTRY_IMAGE/lint:${CI_COMMIT_SHA:0:8} -f Dockerfile-lint .
+       - docker run -i $CI_REGISTRY_IMAGE/lint:${CI_COMMIT_SHA:0:8} sh -c "cd  /go/src/github.com/bshramin/goxy && golangci-lint run"
