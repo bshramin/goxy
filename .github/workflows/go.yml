@@ -62,4 +62,4 @@ jobs:
       run: docker build -t goxy-coverage -f Dockerfile-test .
 
     - name: Run Docker Coverage
-      run: docker run -i goxy-coverage sh -c "cd /go/src/github.com/bshramin/goxy && sh coverage.sh"
+      run: docker run -i goxy-coverage sh -c "cd /go/src/github.com/bshramin/goxy && sh ./coverage.sh"
