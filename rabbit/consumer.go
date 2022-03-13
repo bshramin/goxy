@@ -38,14 +38,14 @@ func (consumer *Consumer) setup(r RInfo) error {
 }
 
 // NewConsumer returns a new Consumer
-func NewConsumer(conn *amqp.Connection,r RInfo, exchangeName string, queueName string) (Consumer, error) {
+func NewConsumer(conn *amqp.Connection, r RInfo, exchangeName string, queueName string) (Consumer, error) {
 	consumer := Consumer{
 		Conn:         conn,
 		QueueName:    queueName,
 		ExchangeName: exchangeName,
 	}
-	err := consumer.setup(r)
-	if err != nil {
+
+	if err := consumer.setup(r); err != nil {
 		return Consumer{}, err
 	}
 
