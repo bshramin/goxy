@@ -34,3 +34,5 @@ linters:
     - noctx
     - goerr113
     - testpackage
+    - wrapcheck
+    - exhaustivestruct
