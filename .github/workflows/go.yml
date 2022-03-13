@@ -63,4 +63,3 @@ jobs:
 
     - name: Run Docker Coverage
       run: docker run -i goxy-coverage sh -c "go env GOPATH | cd && cd /src/github.com/bshramin/goxy && sh ./coverage.sh"
-      
