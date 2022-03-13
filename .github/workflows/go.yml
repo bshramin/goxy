@@ -43,7 +43,7 @@ jobs:
       run: docker build -t goxy-test -f Dockerfile-test .
 
     - name: Run Docker Test
-      run: docker run -i goxy-test sh -c "cd /go/src/github.com/bshramin/goxy && go test -v -mod=vendor ./..."
+      run: docker run -i goxy-test sh -c "go env GOPATH | cd && cd /src/github.com/bshramin/goxy && go test -v -mod=vendor ./..."
 
   coverage:
     runs-on: ubuntu-latest
@@ -62,4 +62,5 @@ jobs:
       run: docker build -t goxy-coverage -f Dockerfile-test .
 
     - name: Run Docker Coverage
-      run: docker run -i goxy-coverage sh -c "cd /go/src/github.com/bshramin/goxy && sh ./coverage.sh"
+      run: docker run -i goxy-coverage sh -c "go env GOPATH | cd && cd /src/github.com/bshramin/goxy && sh ./coverage.sh"
+      
