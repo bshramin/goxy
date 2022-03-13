@@ -11,7 +11,7 @@ import (
 func InfiniteLoop(ctx context.Context, name string, f func(context.Context) error, reDoDuration, failDuration time.Duration) context.Context {
 	go func() {
 		for {
-			DoTasKWithRetry(ctx, name, f, failDuration)
+			DoTaskWithRetry(ctx, name, f, failDuration)
 			select {
 			case <-ctx.Done():
 				logrus.Debug(fmt.Sprintf("exit infinite loop: %s", name))
@@ -23,7 +23,7 @@ func InfiniteLoop(ctx context.Context, name string, f func(context.Context) erro
 	return ctx
 }
 
-func DoTasKWithRetry(c context.Context, name string, f func(context.Context) error, failDuration time.Duration) {
+func DoTaskWithRetry(c context.Context, name string, f func(context.Context) error, failDuration time.Duration) {
 	ctx, cl := context.WithCancel(c)
 	defer func() {
 		cl()

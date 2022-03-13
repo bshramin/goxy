@@ -27,8 +27,7 @@ func NewEventEmitter(conn *amqp.Connection, r RInfo, exchangeName string) (Emitt
 		ExchangeName: exchangeName,
 	}
 
-	err := emitter.setup(r)
-	if err != nil {
+	if err := emitter.setup(r); err != nil {
 		return Emitter{}, err
 	}
 

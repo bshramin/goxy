@@ -16,7 +16,7 @@ type APICrudModel interface {
 	List() interface{}
 }
 
-func CrudCreator(m APICrudModel) map[string]func(c *gin.Context) {
+func Creator(m APICrudModel) map[string]func(c *gin.Context) {
 	return map[string]func(c *gin.Context){
 		http.MethodGet:    getModel(m),
 		http.MethodPost:   createModel(m),
@@ -39,21 +39,22 @@ func GetLimitOffset(c *gin.Context) (int, int) {
 	return limit, offset
 }
 func GetID(c *gin.Context) (int64, error) {
-	IdRaw := c.Param("id")
-	id, err := strconv.ParseInt(IdRaw, 0, 10)
-	return int64(id), err
+	IDRaw := c.Param("id")
+	bitSize := 10
+	id, err := strconv.ParseInt(IDRaw, 0, bitSize)
+	return id, err
 }
 
 func getModel(m APICrudModel) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		IdRaw := c.Param("id")
+		IDRaw := c.Param("id")
 		var (
 			res interface{}
 			err error
 		)
 		dbManager := m.GetDatabase()
 		q := dbManager.Where(m.GetActiveConditionMap())
-		if IdRaw == "" {
+		if IDRaw == "" {
 			limit, offset := GetLimitOffset(c)
 			res = m.List()
 			if limit > 0 {
@@ -68,8 +69,8 @@ func getModel(m APICrudModel) func(c *gin.Context) {
 				return
 			}
 		} else {
-			id, err_ := GetID(c)
-			if err_ != nil {
+			id, err := GetID(c)
+			if err != nil {
 				c.JSON(http.StatusBadRequest, err)
 			}
 			err = q.First(m, id).Error
