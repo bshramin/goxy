@@ -38,6 +38,7 @@ func GetLimitOffset(c *gin.Context) (int, int) {
 	}
 	return limit, offset
 }
+
 func GetID(c *gin.Context) (int64, error) {
 	IDRaw := c.Param("id")
 	bitSize := 10

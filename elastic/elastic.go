@@ -31,7 +31,6 @@ func GetConnection(host string, port int) *elastic.Client {
 }
 
 func HealthCheck(ctx context.Context, client elastic.Client, connection string) error {
-
 	_, _, err := client.Ping(connection).Do(ctx)
 	return err
 }
