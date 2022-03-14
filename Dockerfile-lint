@@ -1,4 +1,4 @@
 FROM golangci/golangci-lint:latest
-ADD . /go/src/git.zooket.ir/snappfood/golang/surface
-WORKDIR /go/src/git.zooket.ir/snappfood/golang/surface
+ADD . /go/src/github.com/bshramin/goxy
+WORKDIR /go/src/github.com/bshramin/goxy
 CMD ["golangci-lint", "run"]

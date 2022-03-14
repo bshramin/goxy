@@ -34,3 +34,15 @@ linters:
     - noctx
     - goerr113
     - testpackage
+    - wrapcheck
+    - exhaustivestruct
+    - gochecknoglobals
+    - nestif
+    - golint
+    - gomnd
+    - revive
+    - golint
+    - govet
+    - godot
+    - stylecheck
+    - lll

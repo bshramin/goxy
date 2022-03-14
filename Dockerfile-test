@@ -1,0 +1,5 @@
+FROM golang:alpine as build
+RUN apk add --no-cache make
+RUN apk add gawk
+RUN apk add build-base
+ADD . /go/src/github.com/bshramin/goxy
