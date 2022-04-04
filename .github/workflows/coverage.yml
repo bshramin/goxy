@@ -1,0 +1,24 @@
+name: Coverage
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18
+
+      - name: Build Docker Coverage
+        run: docker build -t goxy-coverage -f Dockerfile-test .
+
+      - name: Run Docker Coverage
+        run: docker run -i goxy-coverage sh -c "cd /go/src/github.com/bshramin/goxy && sh ./coverage.sh"
