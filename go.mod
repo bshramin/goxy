@@ -6,9 +6,11 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-mail/mail v2.3.1+incompatible
 	github.com/go-redis/redis/v8 v8.11.4
+	github.com/go-redis/redismock/v8 v8.0.6
 	github.com/olivere/elastic/v7 v7.0.31
 	github.com/sirupsen/logrus v1.4.2
 	github.com/streadway/amqp v1.0.0
+	github.com/stretchr/testify v1.7.0
 	go.elastic.co/apm/module/apmelasticsearch v1.15.0
 	gorm.io/driver/mysql v1.3.2
 	gorm.io/driver/postgres v1.3.1
@@ -18,6 +20,7 @@ require (
 require (
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/elastic/go-licenser v0.3.1 // indirect
 	github.com/elastic/go-sysinfo v1.1.1 // indirect
@@ -51,6 +54,7 @@ require (
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/onsi/gomega v1.18.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/procfs v0.0.0-20190425082905-87a4384529e0 // indirect
 	github.com/santhosh-tekuri/jsonschema v1.2.4 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
@@ -68,5 +72,6 @@ require (
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/mail.v2 v2.3.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 	howett.net/plist v0.0.0-20181124034731-591f970eefbb // indirect
 )
