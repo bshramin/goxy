@@ -10,16 +10,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	key     = "testKey"
+	waitKey = "testKey:wait"
+)
+
+type Template struct {
+	Name string
+}
+
 // value : false
 // wait : false
 func TestSharedFetch1(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
-	key := "testKey"
-	waitKey := "testKey:wait"
-	type Template struct {
-		Name string
-	}
 	data := Template{"testData"}
 	tt := 10 * time.Second
 	f := func() (Template, error) {
@@ -42,17 +46,10 @@ func TestSharedFetch1(t *testing.T) {
 func TestSharedFetch2(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
-	key := "testKey"
-	waitKey := "testKey:wait"
-	type Template struct {
-		Name string
-	}
 	data := Template{"testData"}
 	tt := 10 * time.Second
 	f := func() (Template, error) {
 		return data, nil
-	}
-	// expSet, _ := goxy.Encode(data)
 
 	redisDb, redisMock := redismock.NewClientMock()
 	redisMock.MatchExpectationsInOrder(false)
@@ -68,11 +65,6 @@ func TestSharedFetch2(t *testing.T) {
 func TestSharedFetch3(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
-	key := "testKey"
-	waitKey := "testKey:wait"
-	type Template struct {
-		Name string
-	}
 	data := Template{"testData"}
 	tt := 10 * time.Second
 	f := func() (Template, error) {
@@ -96,11 +88,6 @@ func TestSharedFetch3(t *testing.T) {
 func TestSharedFetch4(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
-	key := "testKey"
-	waitKey := "testKey:wait"
-	type Template struct {
-		Name string
-	}
 	data := Template{"testData"}
 	tt := 10 * time.Second
 	f := func() (Template, error) {

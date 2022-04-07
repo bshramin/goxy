@@ -39,10 +39,9 @@ func SharedFetch[K any](ctx context.Context, client *redis.Client, key string, t
 func fetch[K any](ctx context.Context, client *redis.Client, key string, t time.Duration, f func() (K, error)) {
 	var res K
 	waitKey := fmt.Sprintf("%s:wait", key)
-	waitTime := t / 2
 	waitRes := client.Get(ctx, waitKey)
 	_, err := waitRes.Result()
-	if waitRes.Err() == redis.Nil && err == nil {
+	if waitRes.Err() == nil && err == nil {
 		return
 	}
 	res, err = f()
@@ -55,6 +54,6 @@ func fetch[K any](ctx context.Context, client *redis.Client, key string, t time.
 	}
 	err = client.Set(ctx, key, redisSetVal, t).Err()
 	if err == nil {
-		client.Set(ctx, waitKey, "", waitTime)
+		client.Set(ctx, waitKey, "", t/2)
 	}
 }
