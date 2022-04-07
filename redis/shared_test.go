@@ -50,6 +50,7 @@ func TestSharedFetch2(t *testing.T) {
 	tt := 10 * time.Second
 	f := func() (Template, error) {
 		return data, nil
+	}
 
 	redisDb, redisMock := redismock.NewClientMock()
 	redisMock.MatchExpectationsInOrder(false)
