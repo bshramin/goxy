@@ -7,7 +7,11 @@ import (
 
 	"github.com/bshramin/goxy"
 	"github.com/go-redis/redis/v8"
+	"github.com/go-redsync/redsync/v4"
+	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
 )
+
+var keysList = make(map[*redis.Client]map[string]*redsync.Mutex)
 
 // this is used when multi instances of a code try to use shared cache on redis
 // and result fetch function has too much load expensive
@@ -37,14 +41,22 @@ func SharedFetch[K any](ctx context.Context, client *redis.Client, key string, t
 }
 
 func fetch[K any](ctx context.Context, client *redis.Client, key string, t time.Duration, f func() (K, error)) {
-	var res K
-	waitKey := fmt.Sprintf("%s:wait", key)
-	waitRes := client.Get(ctx, waitKey)
-	_, err := waitRes.Result()
-	if waitRes.Err() == nil && err == nil {
+	lock, ok := keysList[client][key]
+	if !ok {
+		_, ok := keysList[client]
+		if !ok {
+			keysList[client] = make(map[string]*redsync.Mutex)
+		}
+		pool := goredis.NewPool(client)
+		rs := redsync.New(pool)
+		lock = rs.NewMutex(fmt.Sprintf("%s:wait", key))
+		keysList[client][key] = lock
+	}
+	if lock.Until().After(time.Now()) {
 		return
 	}
-	res, err = f()
+	var res K
+	res, err := f()
 	if err != nil {
 		return
 	}
@@ -54,6 +66,9 @@ func fetch[K any](ctx context.Context, client *redis.Client, key string, t time.
 	}
 	err = client.Set(ctx, key, redisSetVal, t).Err()
 	if err == nil {
-		client.Set(ctx, waitKey, "", t/2)
+		opt := redsync.WithExpiry(t / 2)
+		opt.Apply(lock)
+		lock.Lock()
+		fmt.Println(lock.Until())
 	}
 }

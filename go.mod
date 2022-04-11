@@ -7,6 +7,7 @@ require (
 	github.com/go-mail/mail v2.3.1+incompatible
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/go-redis/redismock/v8 v8.0.6
+	github.com/go-redsync/redsync/v4 v4.5.0
 	github.com/olivere/elastic/v7 v7.0.31
 	github.com/sirupsen/logrus v1.4.2
 	github.com/streadway/amqp v1.0.0
@@ -31,6 +32,8 @@ require (
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/hashicorp/errwrap v1.0.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.10.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
