@@ -9,6 +9,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/go-redsync/redsync/v4"
 	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
+	"github.com/sirupsen/logrus"
 )
 
 var keysList = make(map[*redis.Client]map[string]*redsync.Mutex)
@@ -68,7 +69,8 @@ func fetch[K any](ctx context.Context, client *redis.Client, key string, t time.
 	if err == nil {
 		opt := redsync.WithExpiry(t / 2)
 		opt.Apply(lock)
-		lock.Lock()
-		fmt.Println(lock.Until())
+		if err := lock.Lock(); err != nil {
+			logrus.Errorf("goxy:SharedFetch:lock:%s", err)
+		}
 	}
 }
