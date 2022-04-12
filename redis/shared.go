@@ -59,18 +59,22 @@ func fetch[K any](ctx context.Context, client *redis.Client, key string, t time.
 	var res K
 	res, err := f()
 	if err != nil {
+		logrus.Errorf("goxy:SharedFetch:fetch:%s:%s", key, err.Error())
 		return
 	}
 	redisSetVal, err := goxy.Encode(res)
 	if err != nil {
+		logrus.Errorf("goxy:SharedFetch:encode:%s", err.Error())
 		return
 	}
 	err = client.Set(ctx, key, redisSetVal, t).Err()
-	if err == nil {
-		opt := redsync.WithExpiry(t / 2)
-		opt.Apply(lock)
-		if err := lock.Lock(); err != nil {
-			logrus.Errorf("goxy:SharedFetch:lock:%s", err)
-		}
+	if err != nil {
+		logrus.Errorf("goxy:SharedFetch:Set:%s:%s", key, err.Error())
+		return
+	}
+	opt := redsync.WithExpiry(t / 2)
+	opt.Apply(lock)
+	if err := lock.Lock(); err != nil {
+		logrus.Errorf("goxy:SharedFetch:lock:%s", err)
 	}
 }
