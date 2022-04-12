@@ -26,7 +26,7 @@ var keysList = make(map[*redis.Client]map[string]*redsync.Mutex)
 func SharedFetch[K any](ctx context.Context, client *redis.Client, key string, t, retryT time.Duration, f func() (K, error), retry int) (K, error) {
 	var res K
 	redisRes := client.Get(ctx, key)
-	go fetch(ctx, client, key, t, retryT, f, retry)
+	go func() { _ = fetch(ctx, client, key, t, retryT, f, retry) }()
 	err := redisRes.Err()
 	if err != nil {
 		return res, err
@@ -43,19 +43,9 @@ func SharedFetch[K any](ctx context.Context, client *redis.Client, key string, t
 }
 
 func fetch[K any](ctx context.Context, client *redis.Client, key string, t, retryT time.Duration, f func() (K, error), retry int) error {
-	lock, ok := keysList[client][key]
-	if !ok {
-		_, ok := keysList[client]
-		if !ok {
-			keysList[client] = make(map[string]*redsync.Mutex)
-		}
-		pool := goredis.NewPool(client)
-		rs := redsync.New(pool)
-		lock = rs.NewMutex(fmt.Sprintf("%s:wait", key))
-		keysList[client][key] = lock
-	}
-	if lock.Until().After(time.Now()) {
-		return errors.New("lock in on")
+	lock, err := checkLock(client, key)
+	if err != nil {
+		return err
 	}
 	opt := redsync.WithExpiry(retryT)
 	opt.Apply(lock)
@@ -63,9 +53,7 @@ func fetch[K any](ctx context.Context, client *redis.Client, key string, t, retr
 		logrus.Errorf("goxy:SharedFetch:lock:%s", err)
 		return errors.New("lock fail")
 	}
-
 	var res K
-	var err error
 	for i := 0; i < retry; i++ {
 		res, err = f()
 		if err == nil {
@@ -92,4 +80,22 @@ func fetch[K any](ctx context.Context, client *redis.Client, key string, t, retr
 	}
 	logrus.Infof("goxy:SharedFetch:Set:%s:Successfully", key)
 	return nil
+}
+
+func checkLock(client *redis.Client, key string) (*redsync.Mutex, error) {
+	lock, ok := keysList[client][key]
+	if !ok {
+		_, ok := keysList[client]
+		if !ok {
+			keysList[client] = make(map[string]*redsync.Mutex)
+		}
+		pool := goredis.NewPool(client)
+		rs := redsync.New(pool)
+		lock = rs.NewMutex(fmt.Sprintf("%s:wait", key))
+		keysList[client][key] = lock
+	}
+	if lock.Until().After(time.Now()) {
+		return nil, errors.New("lock in on")
+	}
+	return lock, nil
 }
