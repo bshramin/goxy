@@ -32,7 +32,7 @@ func TestSharedFetchCreateMap(t *testing.T) {
 	}
 
 	redisDb, _ := redismock.NewClientMock()
-	_, err := SharedFetch(ctx, redisDb, key, tt, f)
+	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	<-time.After(time.Second)
 	assert.Error(t, err)
 	assert.NotEqual(t, len(keysList), 0)
@@ -60,8 +60,8 @@ func TestSharedFetch1(t *testing.T) {
 	expSet, _ := goxy.Encode(data)
 	redisMock.MatchExpectationsInOrder(false)
 	redisMock.ExpectSet(key, expSet, tt).SetVal("OK")
-	redisMock.ExpectSetNX(waitKey, waitData, tt/2).SetVal(false)
-	_, err := SharedFetch(ctx, redisDb, key, tt, f)
+	redisMock.ExpectSetNX(waitKey, waitData, tt/2).SetVal(true)
+	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.Error(t, err)
 	<-time.After(time.Second)
 	assert.NoError(t, redisMock.ExpectationsWereMet())
@@ -94,7 +94,7 @@ func TestSharedFetch2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = SharedFetch(ctx, redisDb, key, tt, f)
+	_, err = SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.Error(t, err)
 	<-time.After(time.Second)
 	assert.Error(t, redisMock.ExpectationsWereMet())
@@ -128,7 +128,7 @@ func TestSharedFetch3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = SharedFetch(ctx, redisDb, key, tt, f)
+	_, err = SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.NoError(t, err)
 	<-time.After(time.Second)
 	assert.Error(t, redisMock.ExpectationsWereMet())
@@ -158,7 +158,7 @@ func TestSharedFetch4(t *testing.T) {
 	redisMock.ExpectSet(key, expSet, tt).SetVal("OK")
 	redisMock.ExpectGet(key).SetVal(expSet)
 	redisMock.ExpectSetNX(waitKey, waitData, tt/2).SetVal(true)
-	_, err := SharedFetch(ctx, redisDb, key, tt, f)
+	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.NoError(t, err)
 	<-time.After(time.Second)
 	assert.NoError(t, redisMock.ExpectationsWereMet())
