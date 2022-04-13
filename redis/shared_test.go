@@ -32,7 +32,7 @@ func TestSharedFetchCreateMap(t *testing.T) {
 	}
 
 	redisDb, _ := redismock.NewClientMock()
-	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, f, 1)
+	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	<-time.After(time.Second)
 	assert.Error(t, err)
 	assert.NotEqual(t, len(keysList), 0)
@@ -61,7 +61,7 @@ func TestSharedFetch1(t *testing.T) {
 	redisMock.MatchExpectationsInOrder(false)
 	redisMock.ExpectSet(key, expSet, tt).SetVal("OK")
 	redisMock.ExpectSetNX(waitKey, waitData, tt/2).SetVal(true)
-	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, f, 1)
+	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.Error(t, err)
 	<-time.After(time.Second)
 	assert.NoError(t, redisMock.ExpectationsWereMet())
@@ -94,7 +94,7 @@ func TestSharedFetch2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = SharedFetch(ctx, redisDb, key, tt, tt/2, f, 1)
+	_, err = SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.Error(t, err)
 	<-time.After(time.Second)
 	assert.Error(t, redisMock.ExpectationsWereMet())
@@ -128,7 +128,7 @@ func TestSharedFetch3(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = SharedFetch(ctx, redisDb, key, tt, tt/2, f, 1)
+	_, err = SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.NoError(t, err)
 	<-time.After(time.Second)
 	assert.Error(t, redisMock.ExpectationsWereMet())
@@ -158,41 +158,8 @@ func TestSharedFetch4(t *testing.T) {
 	redisMock.ExpectSet(key, expSet, tt).SetVal("OK")
 	redisMock.ExpectGet(key).SetVal(expSet)
 	redisMock.ExpectSetNX(waitKey, waitData, tt/2).SetVal(true)
-	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, f, 1)
+	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.NoError(t, err)
 	<-time.After(time.Second)
 	assert.NoError(t, redisMock.ExpectationsWereMet())
-}
-
-func TestFetchRace(t *testing.T) {
-	t.Parallel()
-	redisDb, redisMock := redismock.NewClientMock()
-	pool := goredis.NewPool(redisDb)
-	rs := redsync.New(pool)
-	lock := rs.NewMutex(waitKey, redsync.WithGenValueFunc(func() (string, error) {
-		return waitData, nil
-	}))
-	keysList[redisDb] = make(map[string]*redsync.Mutex)
-	keysList[redisDb][key] = lock
-
-	ctx := context.Background()
-	data := Template{"testData"}
-	tt := 2 * time.Second
-	f := func() (Template, error) {
-		return data, nil
-	}
-	expSet, _ := goxy.Encode(data)
-	redisMock.MatchExpectationsInOrder(false)
-	redisMock.ExpectSet(key, expSet, tt).SetVal("OK")
-	redisMock.ExpectSetNX(waitKey, waitData, tt/2).SetVal(true)
-	var err1, err2 error
-	go func() {
-		err1 = fetch(ctx, redisDb, key, tt, tt/2, f, 1)
-	}()
-	<-time.After(time.Second / 10)
-	go func() {
-		err2 = fetch(ctx, redisDb, key, tt, tt/2, f, 1)
-	}()
-	<-time.After(time.Second)
-	assert.NotEqual(t, err1, err2)
 }

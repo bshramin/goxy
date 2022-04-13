@@ -23,10 +23,10 @@ var keysList = make(map[*redis.Client]map[string]*redsync.Mutex)
 // if it was the case it will not try to fetch
 // but if no one of instances has tried to fetch the result it start to fetch and set a waitKey
 // too inform others
-func SharedFetch[K any](ctx context.Context, client *redis.Client, key string, t, retryT time.Duration, f func() (K, error), retry int) (K, error) {
+func SharedFetch[K any](ctx context.Context, client *redis.Client, key string, t, retryT time.Duration, retry int, f func() (K, error)) (K, error) {
 	var res K
 	redisRes := client.Get(ctx, key)
-	go func() { _ = fetch(ctx, client, key, t, retryT, f, retry) }()
+	go fetch(ctx, client, key, t, retryT, retry, f)
 	err := redisRes.Err()
 	if err != nil {
 		return res, err
@@ -42,16 +42,17 @@ func SharedFetch[K any](ctx context.Context, client *redis.Client, key string, t
 	return res, nil
 }
 
-func fetch[K any](ctx context.Context, client *redis.Client, key string, t, retryT time.Duration, f func() (K, error), retry int) error {
+func fetch[K any](ctx context.Context, client *redis.Client, key string, t, retryT time.Duration, retry int, f func() (K, error)) {
 	lock, err := checkLock(client, key)
 	if err != nil {
-		return err
+		logrus.Infof("goxy:SharedFetch:lock:%s", err)
+		return
 	}
 	opt := redsync.WithExpiry(retryT)
 	opt.Apply(lock)
 	if err := lock.Lock(); err != nil {
-		logrus.Errorf("goxy:SharedFetch:lock:%s", err)
-		return errors.New("lock fail")
+		logrus.Infof("goxy:SharedFetch:lock:%s", err)
+		return
 	}
 	var res K
 	for i := 0; i < retry; i++ {
@@ -66,20 +67,19 @@ func fetch[K any](ctx context.Context, client *redis.Client, key string, t, retr
 			logrus.Errorf("goxy:SharedFetch:unlock:%s", err)
 		}
 		logrus.Errorf("goxy:SharedFetch:fetch(after %d times):%s:%s", retry, key, err.Error())
-		return errors.New("fetch fail")
+		return
 	}
 	redisSetVal, err := goxy.Encode(res)
 	if err != nil {
 		logrus.Errorf("goxy:SharedFetch:encode:%s", err.Error())
-		return errors.New("encodefail")
+		return
 	}
 	err = client.Set(ctx, key, redisSetVal, t).Err()
 	if err != nil {
 		logrus.Errorf("goxy:SharedFetch:Set:%s:%s", key, err.Error())
-		return errors.New("set fail")
+		return
 	}
 	logrus.Infof("goxy:SharedFetch:Set:%s:Successfully", key)
-	return nil
 }
 
 func checkLock(client *redis.Client, key string) (*redsync.Mutex, error) {

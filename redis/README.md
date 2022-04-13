@@ -18,6 +18,5 @@ client := GetClusterConnection(ctx, host, timeout)
 For a Redis server that is shared with same instances of a code to cache data that has high fetch time or high load, you can use sharedFetch. 
 
 ```golang
-// Single connection
-data, err := SharedFetch(ctx, client, key, duration, dataFetchFunc)
+data, err := SharedFetch(ctx, client, key, duration, retryDuration, dataFetchRetry, dataFetchFunc)
 ```
