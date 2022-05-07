@@ -35,7 +35,6 @@ func TestDecode(t *testing.T) {
 }
 
 func getHasher(t *testing.T) *hsh {
-	t.Helper()
 	hasher, err := New(salt, chars, minLen)
 	if err != nil {
 		t.Fatal("hasher init failed")
