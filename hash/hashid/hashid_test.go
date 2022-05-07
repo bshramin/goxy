@@ -1,6 +1,7 @@
 package hashid
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -10,7 +11,10 @@ var minLen = 6
 
 func TestEncode(t *testing.T) {
 	t.Parallel()
-	hasher := getHasher(t)
+	hasher, err := getHasher()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 	id := int64(80175)
 	code, err := hasher.Encode(id)
 	if err != nil {
@@ -23,7 +27,10 @@ func TestEncode(t *testing.T) {
 
 func TestDecode(t *testing.T) {
 	t.Parallel()
-	hasher := getHasher(t)
+	hasher, err := getHasher()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 	code := "3drnmd"
 	id, err := hasher.Decode(code)
 	if err != nil {
@@ -34,10 +41,10 @@ func TestDecode(t *testing.T) {
 	}
 }
 
-func getHasher(t *testing.T) *hsh {
+func getHasher() (*hsh, error) {
 	hasher, err := New(salt, chars, minLen)
 	if err != nil {
-		t.Fatal("hasher init failed")
+		return nil, fmt.Errorf("hasher init failed")
 	}
-	return hasher
+	return hasher, nil
 }
