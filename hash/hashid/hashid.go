@@ -8,11 +8,11 @@ type hsh struct {
 	hashids *hashids.HashID
 }
 
-func New(salt, chars string, len int) (*hsh, error) {
+func New(salt, chars string, minLen int) (*hsh, error) {
 	hidsData := hashids.NewData()
 	hidsData.Alphabet = chars
 	hidsData.Salt = salt
-	hidsData.MinLength = len
+	hidsData.MinLength = minLen
 	h, err := hashids.NewWithData(hidsData)
 	if err != nil {
 		return nil, err
