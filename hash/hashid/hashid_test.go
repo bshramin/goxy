@@ -7,7 +7,9 @@ import (
 var salt = "qtyq68eqeqwy"
 var chars = "abcdefghijklmnopqrstuvwxyz1234567890"
 var minLen = 6
+
 func TestEncode(t *testing.T) {
+	t.Parallel()
 	hasher := getHasher(t)
 	id := int64(80175)
 	code, err := hasher.Encode(id)
@@ -20,6 +22,7 @@ func TestEncode(t *testing.T) {
 }
 
 func TestDecode(t *testing.T) {
+	t.Parallel()
 	hasher := getHasher(t)
 	code := "3drnmd"
 	id, err := hasher.Decode(code)
@@ -32,6 +35,7 @@ func TestDecode(t *testing.T) {
 }
 
 func getHasher(t *testing.T) *hsh {
+	t.Helper()
 	hasher, err := New(salt, chars, minLen)
 	if err != nil {
 		t.Fatal("hasher init failed")
