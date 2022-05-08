@@ -5,9 +5,11 @@ import (
 	"testing"
 )
 
-var salt = "qtyq68eqeqwy"
-var chars = "abcdefghijklmnopqrstuvwxyz1234567890"
-var minLen = 6
+var (
+	salt   = "qtyq68eqeqwy"
+	chars  = "abcdefghijklmnopqrstuvwxyz1234567890"
+	minLen = 6
+)
 
 func TestEncode(t *testing.T) {
 	t.Parallel()
