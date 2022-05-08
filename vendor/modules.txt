@@ -174,6 +174,9 @@ github.com/santhosh-tekuri/jsonschema/mediatypes
 # github.com/sirupsen/logrus v1.4.2
 ## explicit
 github.com/sirupsen/logrus
+# github.com/speps/go-hashids v2.0.0+incompatible
+## explicit
+github.com/speps/go-hashids
 # github.com/streadway/amqp v1.0.0
 ## explicit; go 1.10
 github.com/streadway/amqp
