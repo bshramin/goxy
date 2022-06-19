@@ -1,4 +1,4 @@
-FROM golangci/golangci-lint:v1.44
+FROM golangci/golangci-lint:v1.45
 ADD . /go/src/github.com/bshramin/goxy
 WORKDIR /go/src/github.com/bshramin/goxy
 CMD ["golangci-lint", "run"]
