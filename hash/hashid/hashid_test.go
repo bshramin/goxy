@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	salt   = "qtyq68eqeqwy"
-	chars  = "abcdefghijklmnopqrstuvwxyz1234567890"
+	salt   = "123456"
+	chars  = "abcdefghijklmnopq1234567890"
 	minLen = 6
 )
 
@@ -22,7 +22,7 @@ func TestEncode(t *testing.T) {
 	if err != nil {
 		t.Fatal("encoding failed")
 	}
-	if code != "3drnmd" {
+	if code != "o866n7" {
 		t.Fatal("encoding result is wrong")
 	}
 }
@@ -33,7 +33,7 @@ func TestDecode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	code := "3drnmd"
+	code := "o866n7"
 	id, err := hasher.Decode(code)
 	if err != nil {
 		t.Fatal("decoding failed")
