@@ -26,7 +26,7 @@ var keysList = make(map[*redis.Client]map[string]*redsync.Mutex)
 func SharedFetch[K any](ctx context.Context, client *redis.Client, key string, t, retryT time.Duration, retry int, f func() (K, error)) (K, error) {
 	var res K
 	redisRes := client.Get(ctx, key)
-	go Fetch(ctx, client, key, t, retryT, retry, f)
+	go func() { _ = Fetch(ctx, client, key, t, retryT, retry, f) }()
 	err := redisRes.Err()
 	if err != nil {
 		return res, err
@@ -42,17 +42,17 @@ func SharedFetch[K any](ctx context.Context, client *redis.Client, key string, t
 	return res, nil
 }
 
-func Fetch[K any](ctx context.Context, client *redis.Client, key string, t, retryT time.Duration, retry int, f func() (K, error)) {
+func Fetch[K any](ctx context.Context, client *redis.Client, key string, t, retryT time.Duration, retry int, f func() (K, error)) error {
 	lock, err := CheckLock(client, key)
 	if err != nil {
 		logrus.Infof("goxy:SharedFetch:lock:%s", err)
-		return
+		return err
 	}
 	opt := redsync.WithExpiry(retryT)
 	opt.Apply(lock)
 	if err := lock.Lock(); err != nil {
 		logrus.Infof("goxy:SharedFetch:lock:%s", err)
-		return
+		return err
 	}
 	var res K
 	for i := 0; i < retry; i++ {
@@ -62,24 +62,25 @@ func Fetch[K any](ctx context.Context, client *redis.Client, key string, t, retr
 		}
 	}
 	if err != nil {
-		_, err = lock.Unlock()
-		if err != nil {
-			logrus.Errorf("goxy:SharedFetch:unlock:%s", err)
+		_, lErr := lock.Unlock()
+		if lErr != nil {
+			logrus.Errorf("goxy:SharedFetch:unlock:%s", lErr)
 		}
 		logrus.Errorf("goxy:SharedFetch:fetch(after %d times):%s:%s", retry, key, err.Error())
-		return
+		return err
 	}
 	redisSetVal, err := goxy.Encode(res)
 	if err != nil {
 		logrus.Errorf("goxy:SharedFetch:encode:%s", err.Error())
-		return
+		return err
 	}
 	err = client.Set(ctx, key, redisSetVal, t).Err()
 	if err != nil {
 		logrus.Errorf("goxy:SharedFetch:Set:%s:%s", key, err.Error())
-		return
+		return err
 	}
 	logrus.Infof("goxy:SharedFetch:Set:%s:Successfully", key)
+	return nil
 }
 
 func CheckLock(client *redis.Client, key string) (*redsync.Mutex, error) {
