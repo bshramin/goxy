@@ -7,8 +7,6 @@ import (
 
 	"github.com/bshramin/goxy"
 	"github.com/go-redis/redismock/v8"
-	"github.com/go-redsync/redsync/v4"
-	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,7 +33,6 @@ func TestSharedFetchCreateMap(t *testing.T) {
 	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	<-time.After(time.Second)
 	assert.Error(t, err)
-	assert.NotEqual(t, len(keysList), 0)
 }
 
 // value : false
@@ -43,13 +40,6 @@ func TestSharedFetchCreateMap(t *testing.T) {
 func TestSharedFetch1(t *testing.T) {
 	t.Parallel()
 	redisDb, redisMock := redismock.NewClientMock()
-	pool := goredis.NewPool(redisDb)
-	rs := redsync.New(pool)
-	lock := rs.NewMutex(waitKey, redsync.WithGenValueFunc(func() (string, error) {
-		return waitData, nil
-	}))
-	keysList[redisDb] = make(map[string]*redsync.Mutex)
-	keysList[redisDb][key] = lock
 
 	ctx := context.Background()
 	data := Template{"testData"}
@@ -60,7 +50,7 @@ func TestSharedFetch1(t *testing.T) {
 	expSet, _ := goxy.Encode(data)
 	redisMock.MatchExpectationsInOrder(false)
 	redisMock.ExpectSet(key, expSet, tt).SetVal("OK")
-	redisMock.ExpectSetNX(waitKey, waitData, tt/2).SetVal(true)
+	redisMock.ExpectSetNX(waitKey, true, tt/2).SetVal(true)
 	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.Error(t, err)
 	<-time.After(time.Second)
@@ -73,13 +63,6 @@ func TestSharedFetch2(t *testing.T) {
 	t.Parallel()
 	tt := 10 * time.Second
 	redisDb, redisMock := redismock.NewClientMock()
-	pool := goredis.NewPool(redisDb)
-	rs := redsync.New(pool)
-	lock := rs.NewMutex(waitKey, redsync.WithGenValueFunc(func() (string, error) {
-		return waitData, nil
-	}), redsync.WithExpiry(tt/2))
-	keysList[redisDb] = make(map[string]*redsync.Mutex)
-	keysList[redisDb][key] = lock
 
 	ctx := context.Background()
 	data := Template{"testData"}
@@ -90,11 +73,7 @@ func TestSharedFetch2(t *testing.T) {
 	redisMock.MatchExpectationsInOrder(false)
 	redisMock.ExpectSet(key, expSet, tt).SetVal("OK")
 	redisMock.ExpectSetNX(waitKey, waitData, tt/2).SetVal(true)
-	err := lock.Lock()
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
+	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.Error(t, err)
 	<-time.After(time.Second)
 	assert.Error(t, redisMock.ExpectationsWereMet())
@@ -106,13 +85,6 @@ func TestSharedFetch3(t *testing.T) {
 	t.Parallel()
 	tt := 10 * time.Second
 	redisDb, redisMock := redismock.NewClientMock()
-	pool := goredis.NewPool(redisDb)
-	rs := redsync.New(pool)
-	lock := rs.NewMutex(waitKey, redsync.WithGenValueFunc(func() (string, error) {
-		return waitData, nil
-	}), redsync.WithExpiry(tt/2))
-	keysList[redisDb] = make(map[string]*redsync.Mutex)
-	keysList[redisDb][key] = lock
 
 	ctx := context.Background()
 	data := Template{"testData"}
@@ -124,11 +96,7 @@ func TestSharedFetch3(t *testing.T) {
 	redisMock.ExpectGet(key).SetVal(expSet)
 	redisMock.ExpectSet(key, expSet, tt).SetVal("OK")
 	redisMock.ExpectSetNX(waitKey, waitData, tt/2).SetVal(true)
-	err := lock.Lock()
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
+	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.NoError(t, err)
 	<-time.After(time.Second)
 	assert.Error(t, redisMock.ExpectationsWereMet())
@@ -140,13 +108,6 @@ func TestSharedFetch4(t *testing.T) {
 	t.Parallel()
 	tt := 10 * time.Second
 	redisDb, redisMock := redismock.NewClientMock()
-	pool := goredis.NewPool(redisDb)
-	rs := redsync.New(pool)
-	lock := rs.NewMutex(waitKey, redsync.WithGenValueFunc(func() (string, error) {
-		return waitData, nil
-	}), redsync.WithExpiry(tt/2))
-	keysList[redisDb] = make(map[string]*redsync.Mutex)
-	keysList[redisDb][key] = lock
 
 	ctx := context.Background()
 	data := Template{"testData"}
@@ -157,7 +118,7 @@ func TestSharedFetch4(t *testing.T) {
 	redisMock.MatchExpectationsInOrder(false)
 	redisMock.ExpectSet(key, expSet, tt).SetVal("OK")
 	redisMock.ExpectGet(key).SetVal(expSet)
-	redisMock.ExpectSetNX(waitKey, waitData, tt/2).SetVal(true)
+	redisMock.ExpectSetNX(waitKey, true, tt/2).SetVal(true)
 	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.NoError(t, err)
 	<-time.After(time.Second)
