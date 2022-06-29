@@ -118,7 +118,7 @@ func TestSharedFetch4(t *testing.T) {
 	redisMock.MatchExpectationsInOrder(false)
 	redisMock.ExpectSet(key, expSet, tt).SetVal("OK")
 	redisMock.ExpectGet(key).SetVal(expSet)
-	redisMock.ExpectSetNX(waitKey, waitData, tt/2).SetVal(true)
+	redisMock.ExpectSetNX(waitKey, true, tt/2).SetVal(true)
 	_, err := SharedFetch(ctx, redisDb, key, tt, tt/2, 1, f)
 	assert.NoError(t, err)
 	<-time.After(time.Second)
