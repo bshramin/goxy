@@ -13,7 +13,7 @@ type Emitter struct {
 func (e *Emitter) setup(r RInfo) error {
 	ch, err := e.Conn.Channel()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return r.DeclareExchange(ch, e.ExchangeName)

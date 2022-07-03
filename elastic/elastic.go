@@ -6,11 +6,10 @@ import (
 	"net/http"
 
 	elastic "github.com/olivere/elastic/v7"
-	"github.com/sirupsen/logrus"
 	elasticsearch "go.elastic.co/apm/module/apmelasticsearch"
 )
 
-func GetConnection(host string, port int) *elastic.Client {
+func GetConnection(host string, port int) (*elastic.Client, error) {
 	connection := fmt.Sprintf("http://%s:%d", host, port)
 
 	elast, err := elastic.NewClient(
@@ -21,13 +20,8 @@ func GetConnection(host string, port int) *elastic.Client {
 			Transport: elasticsearch.WrapRoundTripper(http.DefaultTransport),
 		}),
 	)
-	if err != nil {
-		logrus.Error("connect to elastic failed")
-		panic(err)
-	}
 
-	logrus.Infof("successfully connected to elastic : %s", connection)
-	return elast
+	return elast, err
 }
 
 func HealthCheck(ctx context.Context, client elastic.Client, connection string) error {

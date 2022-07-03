@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func GetConnection(host string, port int, dbName, user, password string) *gorm.DB {
+func GetConnection(host string, port int, dbName, user, password string) (*gorm.DB, error) {
 	dsn := url.URL{
 		User:     url.UserPassword(user, password),
 		Scheme:   "postgres",
@@ -18,15 +17,9 @@ func GetConnection(host string, port int, dbName, user, password string) *gorm.D
 		RawQuery: (&url.Values{"sslmode": []string{"disable"}}).Encode(),
 	}
 
-	logrus.Info("Connecting to Postgres: ", dsn.String())
-
 	db, err := gorm.Open(postgres.Open(dsn.String()), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
 
-	logrus.Info("Connected to Postgres: ", dsn.String())
-	return db
+	return db, err
 }
 
 func HealthCheck(db *gorm.DB) error {
