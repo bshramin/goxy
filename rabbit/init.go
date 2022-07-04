@@ -3,11 +3,10 @@ package rabbit
 import (
 	"fmt"
 
-	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
-func GetConnection(user, password, host string, port int, vHost string) *amqp.Connection {
+func GetConnection(user, password, host string, port int, vHost string) (*amqp.Connection, error) {
 	connString := fmt.Sprintf("amqp://%s:%s@%s:%d/%s",
 		user,
 		password,
@@ -16,9 +15,6 @@ func GetConnection(user, password, host string, port int, vHost string) *amqp.Co
 		vHost,
 	)
 	conn, err := amqp.Dial(connString)
-	if err != nil {
-		logrus.Errorf("error while connect to rabbit : %s", err.Error())
-		panic(err)
-	}
-	return conn
+
+	return conn, err
 }
