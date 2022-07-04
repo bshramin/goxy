@@ -41,8 +41,7 @@ func Fetch[K any](ctx context.Context, client redis.Cmdable, key string, t, retr
 	waitKey := fmt.Sprintf("%s:wait", key)
 	cmd := client.SetNX(ctx, waitKey, true, retryT)
 	if val, err := cmd.Result(); err != nil || val == false {
-		logrus.Infof("goxy:SharedFetch:%s-lock:%v", key, err)
-		return err
+		return fmt.Errorf("goxy:SharedFetch:%s-lock:already locked", key)
 	}
 	var res K
 	var err error
