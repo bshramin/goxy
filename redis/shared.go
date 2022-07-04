@@ -18,7 +18,7 @@ import (
 // if it was the case it will not try to fetch
 // but if no one of instances has tried to fetch the result it start to fetch and set a waitKey
 // too inform others
-func SharedFetch[K any](ctx context.Context, client redis.Cmdable, key string, t, retryT time.Duration, retry int, f func() (K, error)) (K, error) {
+func SharedFetch[K any](ctx context.Context, client redis.Cmdable, key string, t, retryT time.Duration, retry int, f func(ctx context.Context) (K, error)) (K, error) {
 	var res K
 	redisRes := client.Get(ctx, key)
 	go func() { _ = Fetch(ctx, client, key, t, retryT, retry, f) }()
@@ -37,7 +37,7 @@ func SharedFetch[K any](ctx context.Context, client redis.Cmdable, key string, t
 	return res, nil
 }
 
-func Fetch[K any](ctx context.Context, client redis.Cmdable, key string, t, retryT time.Duration, retry int, f func() (K, error)) error {
+func Fetch[K any](ctx context.Context, client redis.Cmdable, key string, t, retryT time.Duration, retry int, f func(ctx context.Context) (K, error)) error {
 	waitKey := fmt.Sprintf("%s:wait", key)
 	cmd := client.SetNX(ctx, waitKey, true, retryT)
 	if val, err := cmd.Result(); err != nil || val == false {
@@ -47,7 +47,7 @@ func Fetch[K any](ctx context.Context, client redis.Cmdable, key string, t, retr
 	var res K
 	var err error
 	for i := 0; i < retry; i++ {
-		res, err = f()
+		res, err = f(ctx)
 		if err == nil {
 			break
 		}

@@ -25,7 +25,7 @@ func TestSharedFetchCreateMap(t *testing.T) {
 	ctx := context.Background()
 	data := Template{"testData"}
 	tt := 2 * time.Second
-	f := func() (Template, error) {
+	f := func(ctx context.Context) (Template, error) {
 		return data, nil
 	}
 
@@ -44,7 +44,7 @@ func TestSharedFetch1(t *testing.T) {
 	ctx := context.Background()
 	data := Template{"testData"}
 	tt := 2 * time.Second
-	f := func() (Template, error) {
+	f := func(ctx context.Context) (Template, error) {
 		return data, nil
 	}
 	expSet, _ := goxy.Encode(data)
@@ -66,7 +66,7 @@ func TestSharedFetch2(t *testing.T) {
 
 	ctx := context.Background()
 	data := Template{"testData"}
-	f := func() (Template, error) {
+	f := func(ctx context.Context) (Template, error) {
 		return data, nil
 	}
 	expSet, _ := goxy.Encode(data)
@@ -88,7 +88,7 @@ func TestSharedFetch3(t *testing.T) {
 
 	ctx := context.Background()
 	data := Template{"testData"}
-	f := func() (Template, error) {
+	f := func(ctx context.Context) (Template, error) {
 		return data, nil
 	}
 	expSet, _ := goxy.Encode(data)
@@ -111,7 +111,7 @@ func TestSharedFetch4(t *testing.T) {
 
 	ctx := context.Background()
 	data := Template{"testData"}
-	f := func() (Template, error) {
+	f := func(ctx context.Context) (Template, error) {
 		return data, nil
 	}
 	expSet, _ := goxy.Encode(data)
