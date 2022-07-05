@@ -40,11 +40,16 @@ func SharedFetch[K any](ctx context.Context, client redis.Cmdable, key string, t
 func Fetch[K any](ctx context.Context, client redis.Cmdable, key string, t, retryT time.Duration, retry int, f func(ctx context.Context) (K, error)) error {
 	waitKey := fmt.Sprintf("%s:wait", key)
 	cmd := client.SetNX(ctx, waitKey, true, retryT)
-	if val, err := cmd.Result(); err != nil || val == false {
-		return fmt.Errorf("goxy:SharedFetch:%s-lock:already locked", key)
+	val, err := cmd.Result()
+	if err != nil {
+		err = fmt.Errorf("goxy:SharedFetch:%s-lock:can't fetch lock: %v", key, err)
+		logrus.Error(err)
+		return err
+	}
+	if val == false {
+		return fmt.Errorf("goxy:SharedFetch:%s-lock: locked", key)
 	}
 	var res K
-	var err error
 	for i := 0; i < retry; i++ {
 		res, err = f(ctx)
 		if err == nil {
