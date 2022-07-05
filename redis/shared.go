@@ -40,17 +40,20 @@ func SharedFetch[K any](ctx context.Context, client redis.Cmdable, key string, t
 }
 
 func Fetch[K any](ctx context.Context, client redis.Cmdable, key string, t, retryT time.Duration, retry int, f dataFetcher[K]) error {
-	err := lock(ctx, client, key, retryT)
+	locked, err := lock(ctx, client, key, retryT)
 	if err != nil {
-		logrus.Infof("goxy:SharedFetch:%s-lock:%v", key, err)
+		logrus.Infof("goxy:SharedFetch: %s-lock: %w", key, err)
 		return err
+	}
+	if !locked {
+		return fmt.Errorf("goxy:SharedFetch: %s-lock: locked", key)
 	}
 	res, err := fetchData(ctx, f, retry)
 	if err != nil {
-		if e := unlock(ctx, client, key, retryT); e != nil {
-			logrus.Errorf("goxy:SharedFetch:%s-unlock:%s", key, e)
+		if unlocked, e := unlock(ctx, client, key, retryT); e != nil || !unlocked {
+			logrus.Errorf("goxy:SharedFetch: %s-unlock: %s", key, e)
 		}
-		logrus.Errorf("goxy:SharedFetch:fetch(after %d times):%s:%s", retry, key, err.Error())
+		logrus.Errorf("goxy:SharedFetch: fetch(after %d times): %s: %s", retry, key, err.Error())
 		return err
 	}
 	err = setInredis(ctx, client, key, t, res)
@@ -62,21 +65,22 @@ func Fetch[K any](ctx context.Context, client redis.Cmdable, key string, t, retr
 	return nil
 }
 
-func lock(ctx context.Context, client redis.Cmdable, key string, t time.Duration) error {
+func lock(ctx context.Context, client redis.Cmdable, key string, t time.Duration) (bool, error) {
 	return changeLockstatus(ctx, client, key, t, true)
 }
 
-func unlock(ctx context.Context, client redis.Cmdable, key string, t time.Duration) error {
+func unlock(ctx context.Context, client redis.Cmdable, key string, t time.Duration) (bool, error) {
 	return changeLockstatus(ctx, client, key, t, false)
 }
 
-func changeLockstatus(ctx context.Context, client redis.Cmdable, key string, t time.Duration, status bool) error {
+func changeLockstatus(ctx context.Context, client redis.Cmdable, key string, t time.Duration, status bool) (bool, error) {
 	k := lockingKey(key)
 	cmd := client.SetNX(ctx, k, status, t)
-	if val, err := cmd.Result(); err != nil || val == false {
-		return err
+	val, err := cmd.Result()
+	if err != nil {
+		return false, err
 	}
-	return nil
+	return val, nil
 }
 
 func fetchData[K any](ctx context.Context, fun func(ctx context.Context) (K, error), retry int) (res K, err error) {
