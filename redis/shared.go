@@ -97,12 +97,12 @@ func lockingKey(k string) string {
 func setInredis[K any](ctx context.Context, client redis.Cmdable, key string, t time.Duration, data K) error {
 	redisSetVal, err := goxy.Encode(data)
 	if err != nil {
-		err = fmt.Errorf("goxy:SharedFetch:%s-encode:%s", key, err.Error())
+		err = fmt.Errorf("goxy:SharedFetch: %s-encode: %w", key, err)
 		return err
 	}
 	err = client.Set(ctx, key, redisSetVal, t).Err()
 	if err != nil {
-		err = fmt.Errorf("goxy:SharedFetch:Set:%s:%s", key, err.Error())
+		err = fmt.Errorf("goxy:SharedFetch:Set: %s: %w", key, err)
 		return err
 	}
 	return nil
