@@ -42,7 +42,7 @@ func SharedFetch[K any](ctx context.Context, client redis.Cmdable, key string, t
 func Fetch[K any](ctx context.Context, client redis.Cmdable, key string, t, retryT time.Duration, retry int, f dataFetcher[K]) error {
 	locked, err := lock(ctx, client, key, retryT)
 	if err != nil {
-		logrus.Infof("goxy:SharedFetch: %s-lock: %w", key, err)
+		logrus.Infof("goxy:SharedFetch: %s-lock: %s", key, err.Error())
 		return err
 	}
 	if !locked {
